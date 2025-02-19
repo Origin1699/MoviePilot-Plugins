@@ -13,7 +13,7 @@ class OpenAi:
     _api_url: str = None
     _model: str = "gpt-3.5-turbo"
 
-    def __init__(self, api_key: str = None, api_url: str = None, proxy: dict = None, model: str = None, compatible: dict = None):
+    def __init__(self, api_key: str = None, api_url: str = None, proxy: dict = None, model: str = None, compatible: bool = False):
         self._api_key = api_key
         self._api_url = api_url
         if compatible:

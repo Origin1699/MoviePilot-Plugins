@@ -22,7 +22,7 @@ class ChatGPTCompatible(_PluginBase):
     # 作者主页
     author_url = "https://github.com/Origin1699"
     # 插件配置项ID前缀
-    plugin_config_prefix = "chatgpt_compatible_"
+    plugin_config_prefix = "compatible"
     # 加载顺序
     plugin_order = 15
     # 可使用的用户级别
@@ -50,8 +50,7 @@ class ChatGPTCompatible(_PluginBase):
             if self._openai_url and self._openai_key:
                 self.openai = OpenAi(api_key=self._openai_key, api_url=self._openai_url,
                                      proxy=settings.PROXY if self._proxy else None,
-                                     model=self._model,
-                                     compatible=self._compatible)
+                                     model=self._model,compatible=bool(self._compatible))
 
     def get_state(self) -> bool:
         return self._enabled

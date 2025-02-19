@@ -8,7 +8,7 @@ from app.plugins.chatgpt.openai import OpenAi
 from app.schemas.types import EventType
 
 
-class ChatGPT(_PluginBase):
+class ChatGPTCompatible(_PluginBase):
     # 插件名称
     plugin_name = "ChatGPT兼容版"
     # 插件描述

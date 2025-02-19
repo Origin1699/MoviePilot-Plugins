@@ -8,7 +8,7 @@ from cacheout import Cache
 OpenAISessionCache = Cache(maxsize=100, ttl=3600, timer=time.time, default=None)
 
 
-class OpenAi:
+class OpenAiCompatible:
     _api_key: str = None
     _api_url: str = None
     _model: str = "gpt-3.5-turbo"
@@ -124,15 +124,15 @@ class OpenAi:
             return None
         result = ""
         try:
-            _filename_prompt = "I will give you a movie/tvshow file name.You need to return a Json." \
-                               "\nPay attention to the correct identification of the film name." \
-                               "\n{\"title\":string,\"version\":string,\"part\":string,\"year\":string,\"resolution\":string,\"season\":number|null,\"episode\":number|null}"
+            _filename_prompt = '接下来我会给你一个电影或电视剧的文件名，你需要识别文件名中的名称、版本、分段、年份、分瓣率、季集等信息，并按以下JSON格式返回：{"name":string,"version":string,"part":string,"year":string,"resolution":string,"season":number|null,"episode":number|null}，特别注意返回结果需要严格附合JSON格式，不需要有任何其它的字符。'
             completion = self.__get_model(prompt=_filename_prompt, message=filename)
             result = completion.choices[0].message.content
             return json.loads(result)
         except Exception as e:
-            print(f"{str(e)}：{result}")
-            return {}
+            return {
+                "content": result,
+                "errorMsg": str(e)
+            }
 
     def get_response(self, text: str, userid: str):
         """

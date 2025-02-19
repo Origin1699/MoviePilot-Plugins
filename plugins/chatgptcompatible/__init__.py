@@ -4,7 +4,7 @@ from app.core.config import settings
 from app.core.event import eventmanager, Event
 from app.log import logger
 from app.plugins import _PluginBase
-from app.plugins.chatgpt.openai import OpenAi
+from app.plugins.chatgptcompatible.openai_compatible import OpenAiCompatible
 from app.schemas.types import EventType
 
 
@@ -48,7 +48,7 @@ class ChatGPTCompatible(_PluginBase):
             self._openai_key = config.get("openai_key")
             self._model = config.get("model")
             if self._openai_url and self._openai_key:
-                self.openai = OpenAi(api_key=self._openai_key, api_url=self._openai_url,
+                self.openai = OpenAiCompatible(api_key=self._openai_key, api_url=self._openai_url,
                                      proxy=settings.PROXY if self._proxy else None,
                                      model=self._model,compatible=bool(self._compatible))
 

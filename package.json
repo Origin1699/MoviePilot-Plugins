@@ -1,5 +1,5 @@
 {
-    "ChatGPT": {
+    "ChatGPTCompatible": {
         "name": "ChatGPT兼容版",
         "description": "消息交互支持与ChatGPT对话,兼容不同的API接口",
         "labels": "消息通知,识别",

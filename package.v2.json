@@ -25,5 +25,17 @@
         "history": {
             "v2.1.0": "根据官方ChatGPT插件2.1.0版本修改"
         }
+    },
+    "WebHookNotify": {
+        "name": "WebHook通知",
+        "description": "接收webhook通知并推送。",
+        "labels": "消息通知",
+        "version": "1.0",
+        "icon": "webhook.png",
+        "author": "Origin1699",
+        "level": 1,
+        "history": {
+            "v1.0": "接收webhook通知并推送。"
+        }
     }
 }

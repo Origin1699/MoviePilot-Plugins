@@ -38,7 +38,18 @@ class WebHookNotify(_PluginBase):
             self._msgtype = config.get("msgtype")
             self._title = config.get("title")
 
-    def send_notify(self, text: str) -> schemas.Response:
+    def send_notify(self, request: Request):
+        # 1. 先尝试从 URL 查询参数获取 text
+        query_text = request.query_params.get("text")
+
+        # 2. 再尝试从 body 读取原始文本（不是 JSON 的键值）
+        try:
+            body_text = (await request.body()).decode("utf-8").strip()
+        except Exception:
+            body_text = ""
+
+        # 3. 优先使用 body 的内容，再 fallback 到 query 参数
+        text = body_text or query_text or ""
         """
         发送通知
         """

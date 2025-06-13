@@ -242,7 +242,7 @@ class WebHookNotify(_PluginBase):
         ], {
             "enabled": False,
             "notify": False,
-            "msgtype": ""
+            "msgtype": "",
             "title": ""
         }
 

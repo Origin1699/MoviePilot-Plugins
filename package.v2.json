@@ -37,6 +37,7 @@
         }
     },
     "BangumiSync": {
+        "v3": false,
         "name": "Bangumi打格子",
         "description": "将你在媒体库上的番剧观看，同步到Bangumi在看状态",
         "version": "2.0.2",

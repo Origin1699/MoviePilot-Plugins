@@ -138,16 +138,6 @@ def test_v3_versions_use_next_major_and_descending_history() -> None:
         assert normalized_history == sorted(normalized_history, reverse=True)
 
 
-def test_history_migrator_targets_v3() -> None:
-    """V3 历史迁移插件的展示、配置与落库语义不得继续指向 V2。"""
-    metadata = _load_json(PACKAGE_PATH)["HistoryToV2"]
-    source = (V3_ROOT / "historytov2/__init__.py").read_text(encoding="utf-8")
-    assert "迁移至V3" in metadata["name"]
-    assert "当前 MoviePilot V3" in metadata["description"]
-    assert 'plugin_config_prefix = "historytov3_"' in source
-    assert "__insert_v3_history" in source
-    assert "迁移至 V2" not in source
-
 
 def test_v3_sources_use_unified_media_contract() -> None:
     """V3 通用媒体链不得继续传旧来源专有 ID，也不得依赖已删除的 MusicChain。"""

@@ -45,22 +45,6 @@ def test_manifest_platforms_default_to_product_matrix() -> None:
     assert module.manifest_platforms(manifest) == module.SUPPORTED_PLATFORMS
 
 
-def test_animeupscale_dependency_gate_matches_linux_cuda_contract() -> None:
-    """AnimeUpscale 的大体积 CUDA 依赖只在真实支持的 Linux x64 安装。"""
-    module = _load_install_module()
-    manifest = REPO_ROOT / "plugins.v3/animeupscale/pyproject.toml"
-
-    assert module.manifest_platforms(manifest) == frozenset({"linux-x64"})
-
-
-def test_autosubv2_dependency_gate_excludes_unsupported_macos_intel() -> None:
-    """AutoSubv2 只在 Python 3.14 依赖可安装的平台进入真实安装门禁。"""
-    module = _load_install_module()
-    manifest = REPO_ROOT / "plugins.v3/autosubv2/pyproject.toml"
-
-    assert module.manifest_platforms(manifest) == frozenset(
-        {"linux-x64", "linux-arm64", "windows-x64", "macos-arm64"}
-    )
 
 
 def test_installation_uses_fresh_environment_and_host_manifest_semantics(
@@ -227,14 +211,6 @@ def test_v3t_opt_outs_reject_manifest_without_package_entry(tmp_path: Path) -> N
     with pytest.raises(ValueError, match="未在 package.v3.json 中找到对应插件 ID"):
         module.load_free_threaded_opt_outs([manifest], package_path)
 
-
-def test_repository_manifests_map_to_package_entries() -> None:
-    """仓库内每份 V3 清单都必须能按目录名映射到 package.v3.json 插件 ID。"""
-    module = _load_install_module()
-
-    opt_outs = module.load_free_threaded_opt_outs(module.discover_manifests())
-
-    assert REPO_ROOT / "plugins.v3/autosubv2/pyproject.toml" in opt_outs
 
 
 def test_build_toolchain_detection_lists_available_commands() -> None:

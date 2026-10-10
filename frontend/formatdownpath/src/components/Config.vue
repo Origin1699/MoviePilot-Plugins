@@ -9,7 +9,16 @@ const props = defineProps({
   initialConfig: {
     type: Object,
     default: () => ({}),
-  }
+  },
+  // 当前插件实例 ID（V3 虚拟分身时为分身 ID）
+  pluginId: {
+    type: String,
+    default: '',
+  },
+  sourcePluginId: {
+    type: String,
+    default: '',
+  },
 });
 
 const emit = defineEmits(['close', 'switch', 'save']);
@@ -43,7 +52,9 @@ const _tabs = ref('basic_tab');
 
 async function loadDownloaderSetting() {
   try {
-    const downloaders = await props.api.get('download/clients')
+    const response = await props.api.get('download/clients')
+    // V3 宿主接口返回 { success, message, data }，V2 直接返回列表
+    const downloaders = Array.isArray(response) ? response : (response?.data || [])
     downloaderOptions.value = [
       ...downloaders.map((item: { name: any }) => ({
         title: item.name,

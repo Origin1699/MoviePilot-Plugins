@@ -16,6 +16,7 @@ export default defineConfig({
         vue: {
           requiredVersion: false,
           generate: false,
+          singleton: true,
         },
         vuetify: {
           requiredVersion: false,
@@ -58,6 +59,13 @@ export default defineConfig({
         ...(process.env.NODE_ENV !== 'development' ? [{
           postcssPlugin: 'vuetify-filter',
           Root(root) {
+            // 依赖包中的 Vuetify、MDI 全局样式整体丢弃，避免污染主程序
+            const sourcePath = root.source?.input?.file?.replaceAll('\\', '/') || ''
+            if (sourcePath.includes('/node_modules/vuetify/') ||
+                sourcePath.includes('/node_modules/@mdi/')) {
+              root.nodes = []
+              return
+            }
             // 过滤掉所有vuetify相关的CSS
             root.walkRules(rule => {
               if (rule.selector && (

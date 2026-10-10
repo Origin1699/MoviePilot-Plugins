@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, computed, inject, onMounted, onUnmounted } from 'vue'
 
 interface TorrentItem {
   hash: string
@@ -7,6 +7,11 @@ interface TorrentItem {
   save_path: string
   files_count: number
   downloader: string
+}
+
+interface HostToast {
+  error(message: string): unknown
+  success(message: string): unknown
 }
 
 const props = defineProps({
@@ -17,10 +22,25 @@ const props = defineProps({
   initialConfig: {
     type: Object,
     default: () => ({}),
-  }
+  },
+  // 当前插件实例 ID（V3 虚拟分身时为分身 ID）
+  pluginId: {
+    type: String,
+    default: '',
+  },
+  sourcePluginId: {
+    type: String,
+    default: '',
+  },
 })
 
 const emit = defineEmits(['close', 'switch', 'save'])
+
+// 插件 API 前缀，优先使用宿主传入的实例 ID
+const pluginBase = computed(() => `plugin/${props.pluginId || 'FormatDownPath'}`)
+
+// V3 宿主提供的统一 Toast，V2 宿主不存在时使用页面内通知
+const toast = inject<HostToast | null>('moviepilot:toast', null)
 
 // 通知状态
 const snackbar = reactive({
@@ -31,7 +51,11 @@ const snackbar = reactive({
 })
 
 // 显示通知
-function showNotification(text, color = 'success') {
+function showNotification(text: string, color: 'success' | 'error' = 'success') {
+  if (toast) {
+    color === 'error' ? toast.error(text) : toast.success(text)
+    return
+  }
   snackbar.text = text
   snackbar.color = color
   snackbar.show = true
@@ -56,7 +80,7 @@ let isScrolling = false
 const fetchProcessedData = async () => {
   try {
     error.value = null
-    const response = await props.api.get(`plugin/FormatDownPath/processed_data`)
+    const response = (await props.api.get(`${pluginBase.value}/processed_data`)) || {}
 
     processedData.value = response
     allHashes.value = Object.keys(response).reverse()
@@ -87,7 +111,8 @@ const isValidTorrentItem = (item: any): item is TorrentItem => {
 // 获取单个种子数据并校验
 const fetchAndValidateTorrent = async (hash: string, processedData: Record<string, string>, api: any) => {
   try {
-    const data = await api.get(`plugin/FormatDownPath/torrent_data?torrent_hash=${hash}`)
+    const data = await api.get(`${pluginBase.value}/torrent_data?torrent_hash=${encodeURIComponent(hash)}`)
+    if (!data) return null
     const torrentItem = {
       ...data,
       hash,
@@ -142,16 +167,20 @@ const loadData = async () => {
 const recoverFromHistory = async (hash: string, downloader: string) => {
   try {
     loading.value = true
-    const [success, message]: [Boolean, string] = await props.api.post(
-      `plugin/FormatDownPath/recover_from_history`, {downloader: downloader, torrent_hash: hash})
+    const response = await props.api.post(
+      `${pluginBase.value}/recover_from_history`, {downloader: downloader, torrent_hash: hash})
+    // V3 返回 { success, message, data }，失败时宿主已统一提示；V2 返回 [success, message]
+    const isEnvelope = !Array.isArray(response)
+    const success = isEnvelope ? !!response?.success : !!response[0]
+    const message: string = (isEnvelope ? response?.message : response[1]) || ''
     if (success) {
-      showNotification(message)
+      showNotification(message || '恢复完成')
       // 本地状态更新
       torrentList.value = torrentList.value.filter(t => t.hash !== hash)
       delete processedData.value[hash]
       allHashes.value = allHashes.value.filter(h => h !== hash)
-  } else {
-      showNotification(message, 'error')
+    } else if (!isEnvelope) {
+      showNotification(message || '恢复失败', 'error')
     }
     // 重新计算分页
     if (currentPage.value > 1) {
